@@ -12,7 +12,7 @@ namespace WorkflowLib
 {
     public static class WorkflowInit
     {
-        private const string ConnectionString = "Server=localhost,32769;Database=master;User Id=sa;Password=StrongPassword#1;Encrypt=True;TrustServerCertificate=True";
+        private const string ConnectionString = "Server=localhost,1433;Database=master;User Id=sa;Password=StrongPassword#1;Encrypt=True;TrustServerCertificate=True";
 
         private static readonly Lazy<WorkflowRuntime> LazyRuntime = new(InitWorkflowRuntime);
         private static readonly Lazy<MSSQLProvider> LazyProvider = new(InitMssqlProvider);
