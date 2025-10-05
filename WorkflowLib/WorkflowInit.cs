@@ -1,0 +1,70 @@
+﻿using OptimaJet.Workflow.Core;
+using OptimaJet.Workflow.Core.Builder;
+using OptimaJet.Workflow.Core.Parser;
+using OptimaJet.Workflow.Core.Runtime;
+using OptimaJet.Workflow.DbPersistence;
+using OptimaJet.Workflow.Plugins;
+using System.Xml.Linq;
+using WorkflowLib.Activities;
+using WorkflowLib.Rules;
+
+namespace WorkflowLib
+{
+    public static class WorkflowInit
+    {
+        private const string ConnectionString = "Server=localhost,32769;Database=master;User Id=sa;Password=StrongPassword#1;Encrypt=True;TrustServerCertificate=True";
+
+        private static readonly Lazy<WorkflowRuntime> LazyRuntime = new(InitWorkflowRuntime);
+        private static readonly Lazy<MSSQLProvider> LazyProvider = new(InitMssqlProvider);
+
+        public static WorkflowRuntime Runtime => LazyRuntime.Value;
+        public static MSSQLProvider Provider => LazyProvider.Value;
+
+        private static MSSQLProvider InitMssqlProvider()
+        {
+            return new MSSQLProvider(ConnectionString);
+        }
+
+        private static WorkflowRuntime InitWorkflowRuntime()
+        {
+            // TODO If you have a license key, you have to register it here
+            //WorkflowRuntime.RegisterLicense("your license key text");
+
+            var builder = new WorkflowBuilder<XElement>(
+                Provider,
+                new XmlWorkflowParser(),
+                Provider
+            ).WithDefaultCache();
+
+            // we need BasicPlugin to send email
+            var basicPlugin = new BasicPlugin
+            {
+                Setting_MailserverFrom = "mail@gmail.com",
+                Setting_Mailserver = "smtp.gmail.com",
+                Setting_MailserverSsl = true,
+                Setting_MailserverPort = 587,
+                Setting_MailserverLogin = "mail@gmail.com",
+                Setting_MailserverPassword = "Password"
+            };
+            var runtime = new WorkflowRuntime()
+                .WithPlugin(basicPlugin)
+                .WithBuilder(builder)
+                .WithPersistenceProvider(Provider)
+                .EnableCodeActions()
+                .SwitchAutoUpdateSchemeBeforeGetAvailableCommandsOn()
+                // add custom activity
+                .WithCustomActivities(new List<ActivityBase> { new WeatherActivity() })
+                // add custom rule provider
+                .WithRuleProvider(new SimpleRuleProvider())
+                .AsSingleServer();
+
+            // events subscription
+            runtime.OnProcessActivityChangedAsync += (sender, args, token) => Task.CompletedTask;
+            runtime.OnProcessStatusChangedAsync += (sender, args, token) => Task.CompletedTask;
+
+            runtime.Start();
+
+            return runtime;
+        }
+    }
+}
