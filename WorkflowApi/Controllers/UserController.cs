@@ -12,5 +12,12 @@ namespace WorkflowApi.Controllers
         {
             return Ok(Users.Data);
         }
+
+        [HttpGet]
+        [Route("inspectors")]
+        public async Task<IActionResult> GetInspectors()
+        {
+            return Ok(Inspectors.Data);
+        }
     }
 }

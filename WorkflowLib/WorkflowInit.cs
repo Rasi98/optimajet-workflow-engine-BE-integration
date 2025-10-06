@@ -53,7 +53,11 @@ namespace WorkflowLib
                 .EnableCodeActions()
                 .SwitchAutoUpdateSchemeBeforeGetAvailableCommandsOn()
                 // add custom activity
-                .WithCustomActivities(new List<ActivityBase> { new WeatherActivity() })
+                .WithCustomActivities(new List<ActivityBase>
+                {
+                    new WeatherActivity(),
+                    new AssignInspectorActivity()
+                })
                 // add custom rule provider
                 .WithRuleProvider(new SimpleRuleProvider())
                 .AsSingleServer();
