@@ -15,6 +15,24 @@ namespace WorkflowLib.Activities
             // Template file names (optional, used in Workflow Designer)
             Template = "assignInspectorActivity";
             SVGTemplate = "assignInspectorActivity";
+            // Define dropdown parameter (frontend handles the population)
+            Parameters = new List<CodeActionParameterDefinition>
+            {
+                new CodeActionParameterDefinition
+                {
+                    Name       = "AssignedInspectorId",
+                    Title      = "Inspector",
+                    Type       = ParameterType.Dropdown,
+                    IsRequired = true
+                },
+                new CodeActionParameterDefinition
+                {
+                    Name       = "AssignedInspectorName",
+                    Title      = "Inspector Name",
+                    Type       = ParameterType.Text,
+                    IsRequired = false
+                }
+            };
         }
 
         /// <summary>
@@ -39,18 +57,18 @@ namespace WorkflowLib.Activities
             Dictionary<string, string> parameters,
             CancellationToken token)
         {
-            // Retrieve selected inspector from parameters
-            parameters.TryGetValue("SelectedInspector", out string? selectedInspector);
+            parameters.TryGetValue("AssignedInspectorId", out string? inspectorId);
+            parameters.TryGetValue("AssignedInspectorName", out string? inspectorName);
 
-            if (string.IsNullOrWhiteSpace(selectedInspector))
+            if (string.IsNullOrWhiteSpace(inspectorId))
             {
-                selectedInspector = "No inspector selected";
+                inspectorId = "No inspector selected";
+                inspectorName = string.Empty;
             }
 
-            // Save the selected inspector to the workflow process instance
-            await processInstance.SetParameterAsync("AssignedInspector",
-                selectedInspector,
-                ParameterPurpose.Persistence);
+            // Save values to workflow context
+            await processInstance.SetParameterAsync("AssignedInspectorId", inspectorId, ParameterPurpose.Persistence);
+            await processInstance.SetParameterAsync("AssignedInspectorName", inspectorName ?? string.Empty, ParameterPurpose.Persistence);
         }
     }
 }
