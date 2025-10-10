@@ -39,12 +39,14 @@ namespace WorkflowLib.Activities
         /// Called before the activity is executed.
         /// Here, we populate the dropdown list with static values.
         /// </summary>
-        public override async Task PreExecutionAsync(
+        public override Task PreExecutionAsync(
             WorkflowRuntime runtime,
             ProcessInstance processInstance,
             Dictionary<string, string> parameters,
             CancellationToken token)
         {
+            Console.WriteLine("test");
+            return Task.CompletedTask;
         }
 
         /// <summary>

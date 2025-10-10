@@ -5,6 +5,7 @@ using OptimaJet.Workflow.Core.Runtime;
 using OptimaJet.Workflow.DbPersistence;
 using OptimaJet.Workflow.Plugins;
 using System.Xml.Linq;
+using WorkflowLib.Actions;
 using WorkflowLib.Activities;
 using WorkflowLib.Rules;
 
@@ -36,6 +37,8 @@ namespace WorkflowLib
                 Provider
             ).WithDefaultCache();
 
+
+
             // we need BasicPlugin to send email
             var basicPlugin = new BasicPlugin
             {
@@ -60,6 +63,7 @@ namespace WorkflowLib
                 })
                 // add custom rule provider
                 .WithRuleProvider(new SimpleRuleProvider())
+                .WithActionProvider(new ActionProvider())
                 .AsSingleServer();
 
             // events subscription

@@ -8,20 +8,42 @@ namespace WorkflowLib.Rules
     {
         // name of our rule
         private const string RuleCheckRole = "CheckRole";
+        private const string RuleInspectorIs3 = "InspectorIs3";
 
         public List<string> GetRules(string schemeCode, NamesSearchType namesSearchType)
         {
-            return new List<string> { RuleCheckRole };
+            return new List<string> { RuleCheckRole, RuleInspectorIs3 };
         }
 
         public bool Check(ProcessInstance processInstance, WorkflowRuntime runtime, string identityId, string ruleName, string parameter)
         {
-            // we check that the identityId satisfies our rule, that is, the user has the role specified in the parameter
+            switch (ruleName)
+            {
+                // ✅ Rule 1: Check inspector ID == 3
+                case RuleInspectorIs3:
+                    {
+                        var inspectorIdObj = processInstance.GetParameter("AssignedInspectorId");
+                        if (inspectorIdObj == null)
+                            return false;
 
-            if (RuleCheckRole != ruleName || identityId == null || !Users.UserDict.ContainsKey(identityId)) return false;
+                        var inspectorId = inspectorIdObj.ToString();
+                        return inspectorId == "3";
+                    }
 
-            var user = Users.UserDict[identityId];
-            return user.Roles.Contains(parameter);
+                // ✅ Rule 2: Check user has required role
+                case RuleCheckRole:
+                    {
+                        if (identityId == null || !Users.UserDict.ContainsKey(identityId))
+                            return false;
+
+                        var user = Users.UserDict[identityId];
+                        return user.Roles.Contains(parameter);
+                    }
+
+                // ❌ Default: Unknown rule
+                default:
+                    return false;
+            }
         }
 
         public IEnumerable<string> GetIdentities(ProcessInstance processInstance, WorkflowRuntime runtime, string ruleName, string parameter)
